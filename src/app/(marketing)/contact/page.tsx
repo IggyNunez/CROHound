@@ -7,6 +7,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import ContactForm from "@/components/ContactForm";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -52,59 +53,78 @@ export default function ContactPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-6">
-                                    <p className="text-center text-muted-foreground">
-                                        📧 <strong>Email us directly:</strong>{" "}
-                                        <a
-                                            href="mailto:hello@crohound.com"
-                                            className="text-primary hover:underline"
-                                        >
-                                            hello@crohound.com
-                                        </a>
-                                    </p>
-
-                                    <div className="text-center">
-                                        <p className="text-sm text-muted-foreground mb-4">
-                                            Or book a 15-minute intro call:
-                                        </p>
-                                        <Button asChild size="lg">
-                                            <Link
-                                                href="#"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                Schedule a Call
-                                            </Link>
-                                        </Button>
-                                    </div>
-
-                                    <div className="bg-muted p-4 rounded-lg">
-                                        <h4 className="font-semibold mb-2">
-                                            What to include in your email:
-                                        </h4>
-                                        <ul className="text-sm space-y-1 text-muted-foreground">
-                                            <li>• Your Shopify store URL</li>
-                                            <li>
-                                                • Monthly traffic volume (if
-                                                known)
-                                            </li>
-                                            <li>
-                                                • Current conversion rate (if
-                                                known)
-                                            </li>
-                                            <li>
-                                                • Main conversion goals (sales,
-                                                signups, etc.)
-                                            </li>
-                                            <li>
-                                                • Any specific concerns or
-                                                bottlenecks
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                <ContactForm />
                             </CardContent>
                         </Card>
+                    </div>
+                </div>
+            </section>
+
+            {/* Alternative Contact Methods */}
+            <section className="py-8 md:py-16">
+                <div className="container px-4 md:px-6">
+                    <div className="max-w-2xl mx-auto text-center space-y-6">
+                        <h3 className="text-xl font-semibold">
+                            Prefer to reach out directly?
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2">
+                                    📧 Email Us
+                                </h4>
+                                <p className="text-sm text-muted-foreground mb-3">
+                                    Send us your store details directly
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    asChild
+                                    className="w-full"
+                                >
+                                    <a href="mailto:hello@crohound.com">
+                                        hello@crohound.com
+                                    </a>
+                                </Button>
+                            </div>
+
+                            <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2">
+                                    📞 Book a Call
+                                </h4>
+                                <p className="text-sm text-muted-foreground mb-3">
+                                    15-minute intro call to discuss your needs
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    asChild
+                                    className="w-full"
+                                >
+                                    <Link
+                                        href="#"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Schedule Call
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="bg-muted p-4 rounded-lg text-left">
+                            <h4 className="font-semibold mb-2">
+                                What to include in your email:
+                            </h4>
+                            <ul className="text-sm space-y-1 text-muted-foreground">
+                                <li>• Your Shopify store URL</li>
+                                <li>• Monthly traffic volume (if known)</li>
+                                <li>• Current conversion rate (if known)</li>
+                                <li>
+                                    • Main conversion goals (sales, signups,
+                                    etc.)
+                                </li>
+                                <li>• Any specific concerns or bottlenecks</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>

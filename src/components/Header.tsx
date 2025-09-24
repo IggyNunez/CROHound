@@ -29,19 +29,20 @@ const NavLink = memo(
         <Link
             href={item.href}
             className={cn(
+                "nav-link",
                 "relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl group border border-transparent",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50",
-                "hover:shadow-lg hover:shadow-red-500/20 hover:scale-105",
+                "hover:shadow-lg hover:shadow-red-500/25 hover:scale-105 hover:-translate-y-0.5",
                 isActive
                     ? "text-white bg-gradient-to-r from-red-600/40 to-yellow-500/40 shadow-md shadow-red-500/20 border-red-500/30"
-                    : "text-zinc-200 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-yellow-500/20 hover:border-red-500/20 hover:shadow-red-500/30"
+                    : "text-zinc-200 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-yellow-500/20 hover:border-red-500/30"
             )}
         >
             {item.label}
-            {isActive && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-3/4 bg-gradient-to-r from-red-400 to-yellow-400 rounded-full animate-pulse" />
-            )}
-            <span className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/10 to-yellow-500/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Elegant underline animation */}
+            <span className="absolute bottom-1 left-1/2 h-0.5 w-0 bg-gradient-to-r from-red-500 to-yellow-500 transition-all duration-300 group-hover:w-3/4 group-hover:-translate-x-1/2 rounded-full" />
+            {/* Subtle glow effect */}
+            <span className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-yellow-500/0 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300" />
         </Link>
     )
 );
@@ -64,7 +65,7 @@ const MobileNavLink = memo(
             onClick={onClick}
             className={cn(
                 "block px-6 py-4 text-lg font-medium transition-all duration-200 border-l-4",
-                "hover:bg-zinc-800/70 hover:border-red-400 hover:text-white",
+                "hover:bg-zinc-800/50 hover:border-red-400 hover:text-white hover:translate-x-1",
                 isActive
                     ? "text-white bg-red-600/20 border-red-500"
                     : "text-zinc-200 border-transparent"
@@ -160,7 +161,7 @@ const Header = memo(() => {
                         {/* Logo */}
                         <Link
                             href="/"
-                            className="flex items-center gap-3 sm:gap-4 group flex-shrink-0"
+                            className="flex items-center gap-3 sm:gap-4 group flex-shrink-0 logo-container"
                             aria-label="CROHound Home"
                         >
                             <div className="relative">
@@ -169,12 +170,12 @@ const Header = memo(() => {
                                     alt="CROHound"
                                     width={56}
                                     height={56}
-                                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+                                    className="logo-img w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain transition-all duration-300 group-hover:scale-110 group-hover:rotate-2"
                                     priority
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 to-yellow-500/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 animate-pulse" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-yellow-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
                             </div>
-                            <span className="hidden sm:block text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent truncate">
+                            <span className="hidden sm:block text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent truncate transition-all duration-300 group-hover:from-red-400 group-hover:to-yellow-400">
                                 CROHOUND
                             </span>
                         </Link>
@@ -197,20 +198,33 @@ const Header = memo(() => {
                         <div className="hidden lg:flex items-center gap-4">
                             <Button
                                 asChild
-                                className="h-11 lg:h-14 px-4 lg:px-8 text-xs lg:text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-xl shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105 transition-all duration-300 rounded-xl whitespace-nowrap"
+                                className="cta-button relative h-11 lg:h-14 px-4 lg:px-8 text-xs lg:text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 rounded-xl whitespace-nowrap overflow-hidden group"
                             >
-                                <Link href="/contact">GET FREE AUDIT</Link>
+                                <Link
+                                    href="/contact"
+                                    className="flex items-center relative z-10"
+                                >
+                                    GET FREE AUDIT
+                                    {/* Elegant shimmer effect */}
+                                    <div className="absolute inset-0 -top-1 -bottom-1 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+                                </Link>
                             </Button>
                         </div>
 
                         {/* Mobile Menu Toggle */}
                         <button
                             onClick={toggleMenu}
-                            className="lg:hidden p-3 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-white/5 flex-shrink-0"
+                            className="mobile-toggle lg:hidden p-3 text-gray-300 hover:text-white transition-all duration-300 rounded-lg hover:bg-white/5 hover:scale-105 flex-shrink-0"
                             aria-expanded={isOpen}
                             aria-label="Toggle menu"
                         >
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
+                            <div
+                                className={`transition-all duration-300 ${
+                                    isOpen ? "rotate-180" : "rotate-0"
+                                }`}
+                            >
+                                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                            </div>
                         </button>
                     </div>
                 </div>
@@ -257,10 +271,15 @@ const Header = memo(() => {
                     <div className="p-6 border-t border-zinc-800/50">
                         <Button
                             asChild
-                            className="w-full h-14 px-6 text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-xl shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105 transition-all duration-300 rounded-xl"
+                            className="relative w-full h-14 px-6 text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:scale-102 transition-all duration-300 rounded-xl overflow-hidden group"
                         >
-                            <Link href="/contact" onClick={closeMenu}>
+                            <Link
+                                href="/contact"
+                                onClick={closeMenu}
+                                className="flex items-center justify-center relative z-10"
+                            >
                                 GET YOUR FREE SNIFF CHECK
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                             </Link>
                         </Button>
                     </div>

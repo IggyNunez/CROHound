@@ -3,63 +3,30 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Loader2, CheckCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-
-// Form validation schema
-const formSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email"),
-    storeUrl: z
-        .string()
-        .url("Please enter a valid URL")
-        .optional()
-        .or(z.literal("")),
-    monthlyRevenue: z.string().min(1, "Please select your monthly revenue"),
-    message: z.string().min(10, "Message must be at least 10 characters"),
-    honeypot: z.string().max(0), // Anti-spam field
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
+import { contactSchema, type ContactFormData } from "@/lib/validation";
 
 export default function ContactForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const form = useForm<FormData>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<ContactFormData>({
+        resolver: zodResolver(contactSchema),
         defaultValues: {
             name: "",
             email: "",
             storeUrl: "",
-            monthlyRevenue: "",
+            monthlyRevenue: undefined,
             message: "",
             honeypot: "", // Hidden field for spam protection
         },
     });
 
-    async function onSubmit(data: FormData) {
+    async function onSubmit(data: ContactFormData) {
         setIsSubmitting(true);
         setError(null);
 
@@ -70,22 +37,38 @@ export default function ContactForm() {
                 body: JSON.stringify(data),
             });
 
-            if (!response.ok) throw new Error("Failed to send message");
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error(
+                        "You've submitted too many requests. Please try again in 15 minutes."
+                    );
+                }
+                throw new Error(result.error || "Failed to send message");
+            }
 
             setIsSuccess(true);
             form.reset();
 
             // Track conversion
-            if (window.gtag) {
+            if (typeof window !== "undefined" && window.gtag) {
                 window.gtag("event", "generate_lead", {
                     currency: "USD",
                     value: 0,
                 });
             }
+
+            // Track with Clarity (if available)
+            if (typeof window !== "undefined" && window.clarity) {
+                window.clarity("event", "contact_form_submit");
+            }
         } catch (err) {
-            setError(
-                "Something went wrong. Please try again or email us directly."
-            );
+            const errorMessage =
+                err instanceof Error
+                    ? err.message
+                    : "Something went wrong. Please try again or email us directly at hello@crohound.com";
+            setError(errorMessage);
             console.error("Contact form error:", err);
         } finally {
             setIsSubmitting(false);
@@ -94,207 +77,201 @@ export default function ContactForm() {
 
     if (isSuccess) {
         return (
-            <Alert className="border-green-500 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">
-                    <strong>Success!</strong> We've received your request and
-                    will send your Sniff Check within 48 hours. Check your email
-                    for confirmation.
-                </AlertDescription>
-            </Alert>
+            <div className="border border-green-200 bg-green-50 p-6 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                        <h3 className="font-semibold text-green-800">
+                            Success! Your Sniff Check is on the way 🐕
+                        </h3>
+                        <p className="text-green-700 mt-1">
+                            We've received your request and will send your free
+                            audit within 48 hours. Check your email for
+                            confirmation.
+                        </p>
+                        <p className="text-sm text-green-600 mt-2">
+                            Questions? Email us at{" "}
+                            <a
+                                href="mailto:hello@crohound.com"
+                                className="underline"
+                            >
+                                hello@crohound.com
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Honeypot field (hidden) */}
-                <input
-                    type="text"
-                    name="honeypot"
-                    className="hidden"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    {...form.register("honeypot")}
-                />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Honeypot field (hidden) */}
+            <input
+                type="text"
+                className="hidden"
+                tabIndex={-1}
+                autoComplete="off"
+                {...form.register("honeypot")}
+            />
 
-                <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name *</FormLabel>
-                            <FormControl>
-                                <Input placeholder="John Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email *</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="email"
-                                    placeholder="john@shopifystore.com"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                We'll send your Sniff Check results to this
-                                email
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="storeUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Store URL (optional)</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="https://mystore.myshopify.com"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormDescription>
-                                If you provide your store URL, we'll start the
-                                audit immediately
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="monthlyRevenue"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Monthly Revenue *</FormLabel>
-                            <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select your revenue range" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="0-5k">
-                                        $0 - $5k
-                                    </SelectItem>
-                                    <SelectItem value="5k-15k">
-                                        $5k - $15k
-                                    </SelectItem>
-                                    <SelectItem value="15k-50k">
-                                        $15k - $50k
-                                    </SelectItem>
-                                    <SelectItem value="50k-100k">
-                                        $50k - $100k
-                                    </SelectItem>
-                                    <SelectItem value="100k+">
-                                        $100k+
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>
-                                Tell us about your main conversion challenge *
-                            </FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="High cart abandonment, low product page conversions, etc."
-                                    className="min-h-[120px]"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {error && (
-                    <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-
-                <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full"
-                    disabled={isSubmitting}
+            <div>
+                <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Submitting...
-                        </>
-                    ) : (
-                        "Get My Free Sniff Check →"
-                    )}
-                </Button>
+                    Name *
+                </label>
+                <Input
+                    id="name"
+                    placeholder="John Doe"
+                    {...form.register("name")}
+                    className={
+                        form.formState.errors.name ? "border-red-500" : ""
+                    }
+                />
+                {form.formState.errors.name && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.name.message}
+                    </p>
+                )}
+            </div>
 
-                <p className="text-sm text-muted-foreground text-center">
-                    No spam, no commitment. You'll receive your audit within 48
-                    hours.
+            <div>
+                <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Email *
+                </label>
+                <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@shopifystore.com"
+                    {...form.register("email")}
+                    className={
+                        form.formState.errors.email ? "border-red-500" : ""
+                    }
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                    We'll send your Sniff Check results to this email
                 </p>
-            </form>
-        </Form>
+                {form.formState.errors.email && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.email.message}
+                    </p>
+                )}
+            </div>
+
+            <div>
+                <label
+                    htmlFor="storeUrl"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Store URL (optional)
+                </label>
+                <Input
+                    id="storeUrl"
+                    placeholder="https://mystore.myshopify.com"
+                    {...form.register("storeUrl")}
+                    className={
+                        form.formState.errors.storeUrl ? "border-red-500" : ""
+                    }
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                    If you provide your store URL, we'll start the audit
+                    immediately
+                </p>
+                {form.formState.errors.storeUrl && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.storeUrl.message}
+                    </p>
+                )}
+            </div>
+
+            <div>
+                <label
+                    htmlFor="monthlyRevenue"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Monthly Revenue *
+                </label>
+                <select
+                    id="monthlyRevenue"
+                    {...form.register("monthlyRevenue")}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 ${
+                        form.formState.errors.monthlyRevenue
+                            ? "border-red-500"
+                            : ""
+                    }`}
+                >
+                    <option value="">Select your revenue range</option>
+                    <option value="0-5k">$0 - $5k</option>
+                    <option value="5k-15k">$5k - $15k</option>
+                    <option value="15k-50k">$15k - $50k</option>
+                    <option value="50k-100k">$50k - $100k</option>
+                    <option value="100k+">$100k+</option>
+                </select>
+                {form.formState.errors.monthlyRevenue && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.monthlyRevenue.message}
+                    </p>
+                )}
+            </div>
+
+            <div>
+                <label
+                    htmlFor="message"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                    Tell us about your main conversion challenge *
+                </label>
+                <Textarea
+                    id="message"
+                    placeholder="High cart abandonment, low product page conversions, etc."
+                    className={`min-h-[120px] ${
+                        form.formState.errors.message ? "border-red-500" : ""
+                    }`}
+                    {...form.register("message")}
+                />
+                {form.formState.errors.message && (
+                    <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.message.message}
+                    </p>
+                )}
+            </div>
+
+            {error && (
+                <div className="border border-red-200 bg-red-50 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                        <div>
+                            <p className="text-red-800">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                    </>
+                ) : (
+                    "Get My Free Sniff Check →"
+                )}
+            </Button>
+
+            <p className="text-sm text-gray-500 text-center">
+                No spam, no commitment. You'll receive your audit within 48
+                hours.
+            </p>
+        </form>
     );
-}
-
-// src/app/api/contact/route.ts
-import { NextResponse } from "next/server";
-
-export async function POST(request: Request) {
-    try {
-        const body = await request.json();
-
-        // Spam check
-        if (body.honeypot) {
-            return NextResponse.json({ success: true });
-        }
-
-        // Here you would integrate with your email service
-        // Example: SendGrid, Resend, AWS SES, etc.
-
-        // For now, just log the submission
-        console.log("Contact form submission:", body);
-
-        // TODO: Implement actual email sending
-        // await sendEmail({
-        //   to: process.env.ADMIN_EMAIL,
-        //   subject: `New Sniff Check Request: ${body.name}`,
-        //   data: body
-        // });
-
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error("Contact form error:", error);
-        return NextResponse.json(
-            { error: "Failed to process request" },
-            { status: 500 }
-        );
-    }
 }
