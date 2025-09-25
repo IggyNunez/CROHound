@@ -85,8 +85,8 @@ export default function ContactForm() {
                             Success! Your Sniff Check is on the way 🐕
                         </h3>
                         <p className="text-green-700 mt-1">
-                            We've received your request and will send your free
-                            audit within 48 hours. Check your email for
+                            We&apos;ve received your request and will send your
+                            free audit within 48 hours. Check your email for
                             confirmation.
                         </p>
                         <p className="text-sm text-green-600 mt-2">
@@ -154,7 +154,7 @@ export default function ContactForm() {
                     }
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                    We'll send your Sniff Check results to this email
+                    We&apos;ll send your Sniff Check results to this email
                 </p>
                 {form.formState.errors.email && (
                     <p className="mt-1 text-sm text-red-600">
@@ -179,7 +179,7 @@ export default function ContactForm() {
                     }
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                    If you provide your store URL, we'll start the audit
+                    If you provide your store URL, we&apos;ll start the audit
                     immediately
                 </p>
                 {form.formState.errors.storeUrl && (
@@ -269,7 +269,7 @@ export default function ContactForm() {
             </Button>
 
             <p className="text-sm text-gray-500 text-center">
-                No spam, no commitment. You'll receive your audit within 48
+                No spam, no commitment. You&apos;ll receive your audit within 48
                 hours.
             </p>
         </form>
