@@ -8,13 +8,13 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Types - move to shared types file later
+// Types
 interface NavItem {
     label: string;
     href: string;
 }
 
-// Static data - prevents recreation on every render
+// Static data
 const NAV_ITEMS: NavItem[] = [
     { label: "Services", href: "/services" },
     { label: "Packages", href: "/packages" },
@@ -29,13 +29,21 @@ const NavLink = memo(
         <Link
             href={item.href}
             className={cn(
-                "nav-link",
-                "relative px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-xl group border border-transparent",
+                "relative px-6 py-3 text-sm font-semibold rounded-xl border transition-all duration-300",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50",
-                "hover:shadow-lg hover:shadow-red-500/25 hover:scale-105 hover:-translate-y-0.5",
-                isActive
-                    ? "text-white bg-gradient-to-r from-red-600/40 to-yellow-500/40 shadow-md shadow-red-500/20 border-red-500/30"
-                    : "text-zinc-200 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-yellow-500/20 hover:border-red-500/30"
+                // Default state
+                "text-zinc-200 border-transparent",
+                // Hover state - using standard Tailwind hover utilities
+                "hover:text-white hover:scale-105 hover:-translate-y-0.5",
+                "hover:bg-gradient-to-r hover:from-red-600/20 hover:to-yellow-500/20",
+                "hover:border-red-500/30 hover:shadow-lg hover:shadow-red-500/25",
+                // Active state
+                isActive && [
+                    "text-white bg-gradient-to-r from-red-600/40 to-yellow-500/40",
+                    "shadow-md shadow-red-500/20 border-red-500/30",
+                ],
+                // Group for child animations
+                "group"
             )}
         >
             {item.label}
@@ -67,8 +75,8 @@ const MobileNavLink = memo(
                 "block px-6 py-4 text-lg font-medium transition-all duration-200 border-l-4",
                 "hover:bg-zinc-800/50 hover:border-red-400 hover:text-white hover:translate-x-1",
                 isActive
-                    ? "text-white bg-red-600/20 border-red-500"
-                    : "text-zinc-200 border-transparent"
+                    ? "bg-zinc-800/30 text-white border-red-500"
+                    : "text-zinc-300 border-transparent"
             )}
         >
             {item.label}
@@ -78,33 +86,23 @@ const MobileNavLink = memo(
 
 MobileNavLink.displayName = "MobileNavLink";
 
-// Main Header Component
-const Header = memo(() => {
-    const pathname = usePathname();
+export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const pathname = usePathname();
 
-    // Optimized scroll handler with throttling
+    // Handle scroll effect
     useEffect(() => {
-        let ticking = false;
-
-        const updateScrollStatus = () => {
-            setIsScrolled(window.scrollY > 10);
-            ticking = false;
-        };
-
         const handleScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(updateScrollStatus);
-                ticking = true;
-            }
+            setIsScrolled(window.scrollY > 10);
         };
 
-        // Initial check
-        updateScrollStatus();
+        handleScroll(); // Check initial scroll position
         window.addEventListener("scroll", handleScroll, { passive: true });
 
-        return () => window.removeEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
     }, []);
 
     // Close mobile menu on route change
@@ -112,56 +110,53 @@ const Header = memo(() => {
         setIsOpen(false);
     }, [pathname]);
 
-    // Prevent body scroll when mobile menu is open
+    // Prevent body scroll when menu is open
     useEffect(() => {
-        document.body.style.overflow = isOpen ? "hidden" : "";
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+
         return () => {
             document.body.style.overflow = "";
         };
     }, [isOpen]);
 
-    // Memoized callbacks
-    const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
-    const closeMenu = useCallback(() => setIsOpen(false), []);
+    const toggleMenu = useCallback(() => {
+        setIsOpen((prev) => !prev);
+    }, []);
 
     const isActive = useCallback(
-        (href: string) => {
-            if (href === "/") return pathname === href;
-            return pathname?.startsWith(href) || false;
-        },
+        (href: string) => pathname === href,
         [pathname]
     );
 
     return (
         <>
             <header
-                className="sticky top-0 z-50 w-full bg-black border-b transition-all duration-300 overflow-x-hidden"
-                style={{
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    borderBottomColor: isScrolled
-                        ? "rgba(239,68,68,0.2)"
-                        : "rgba(255,255,255,0.05)",
-                    boxShadow: isScrolled
-                        ? "0 25px 50px -12px rgba(239,68,68,0.1)"
-                        : "none",
-                }}
+                className={cn(
+                    "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+                    isScrolled
+                        ? "bg-zinc-900/95 backdrop-blur-lg shadow-[0_25px_50px_-12px_rgba(239,68,68,0.1)]"
+                        : "bg-zinc-900/80 backdrop-blur-md"
+                )}
             >
                 {/* Gradient Overlay for Scrolled State */}
                 <div
-                    className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-                    style={{
-                        background:
-                            "linear-gradient(to right, rgba(127,29,29,0.2), rgba(127,29,29,0.4), rgba(127,29,29,0.2))",
-                        opacity: isScrolled ? 1 : 0,
-                    }}
+                    className={cn(
+                        "absolute inset-0 pointer-events-none transition-opacity duration-300",
+                        "bg-gradient-to-r from-red-900/20 via-red-900/40 to-red-900/20",
+                        isScrolled ? "opacity-100" : "opacity-0"
+                    )}
                 />
+
                 <div className="container mx-auto px-3 sm:px-4 lg:px-8 max-w-7xl">
-                    <div className="flex h-20 lg:h-24 items-center justify-between min-w-0">
+                    <div className="flex h-20 lg:h-24 items-center justify-between min-w-0 relative">
                         {/* Logo */}
                         <Link
                             href="/"
-                            className="flex items-center gap-3 sm:gap-4 group flex-shrink-0 logo-container"
+                            className="flex items-center gap-3 sm:gap-4 group flex-shrink-0 transition-transform duration-300 hover:scale-105"
                             aria-label="CROHound Home"
                         >
                             <div className="relative">
@@ -170,7 +165,7 @@ const Header = memo(() => {
                                     alt="CROHound"
                                     width={56}
                                     height={56}
-                                    className="logo-img w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain transition-all duration-300 group-hover:scale-110 group-hover:rotate-2"
+                                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain transition-all duration-300 group-hover:scale-110 group-hover:rotate-2"
                                     priority
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-yellow-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
@@ -198,7 +193,15 @@ const Header = memo(() => {
                         <div className="hidden lg:flex items-center gap-4">
                             <Button
                                 asChild
-                                className="cta-button relative h-11 lg:h-14 px-4 lg:px-8 text-xs lg:text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:scale-105 hover:-translate-y-0.5 transition-all duration-300 rounded-xl whitespace-nowrap overflow-hidden group"
+                                className={cn(
+                                    "relative h-11 lg:h-14 px-4 lg:px-8 text-xs lg:text-base font-bold",
+                                    "bg-gradient-to-r from-red-600 to-red-700 text-white border-0",
+                                    "shadow-lg shadow-red-500/20 rounded-xl whitespace-nowrap overflow-hidden",
+                                    "transition-all duration-300 group",
+                                    "hover:from-red-700 hover:to-red-800",
+                                    "hover:shadow-xl hover:shadow-red-500/30",
+                                    "hover:scale-105 hover:-translate-y-0.5"
+                                )}
                             >
                                 <Link
                                     href="/contact"
@@ -214,80 +217,77 @@ const Header = memo(() => {
                         {/* Mobile Menu Toggle */}
                         <button
                             onClick={toggleMenu}
-                            className="mobile-toggle lg:hidden p-3 text-gray-300 hover:text-white transition-all duration-300 rounded-lg hover:bg-white/5 hover:scale-105 flex-shrink-0"
+                            className={cn(
+                                "lg:hidden p-3 text-gray-300 transition-all duration-300 rounded-lg flex-shrink-0",
+                                "hover:text-white hover:bg-white/5 hover:scale-105"
+                            )}
                             aria-expanded={isOpen}
                             aria-label="Toggle menu"
                         >
                             <div
-                                className={`transition-all duration-300 ${
+                                className={cn(
+                                    "transition-all duration-300",
                                     isOpen ? "rotate-180" : "rotate-0"
-                                }`}
+                                )}
                             >
-                                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                                {isOpen ? (
+                                    <X className="w-6 h-6" />
+                                ) : (
+                                    <Menu className="w-6 h-6" />
+                                )}
                             </div>
                         </button>
                     </div>
                 </div>
             </header>
 
-            {/* Mobile Navigation Overlay */}
-            {isOpen && (
-                <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm">
-                    <div
-                        className="absolute inset-0"
-                        onClick={closeMenu}
-                        aria-hidden="true"
-                    />
-                </div>
-            )}
-
-            {/* Mobile Navigation Menu */}
+            {/* Mobile Navigation */}
             <div
                 className={cn(
-                    "lg:hidden fixed top-20 lg:top-24 right-0 bottom-0 z-50",
-                    "w-72 max-w-[85vw] min-w-0",
-                    "bg-black/98 backdrop-blur-xl border-l border-zinc-700/50",
-                    "transform transition-transform duration-300 ease-out overflow-x-hidden",
-                    isOpen ? "translate-x-0" : "translate-x-full"
+                    "lg:hidden fixed inset-x-0 top-20 z-30 transition-all duration-300",
+                    isOpen
+                        ? "opacity-100 translate-y-0 pointer-events-auto"
+                        : "opacity-0 -translate-y-4 pointer-events-none"
                 )}
             >
                 <nav
-                    className="flex flex-col h-full"
+                    className="bg-zinc-900/98 backdrop-blur-lg border-b border-zinc-800 shadow-2xl"
                     aria-label="Mobile navigation"
                 >
-                    {/* Navigation Links */}
-                    <div className="flex-1 py-6">
-                        {NAV_ITEMS.map((item) => (
-                            <MobileNavLink
-                                key={item.href}
-                                item={item}
-                                isActive={isActive(item.href)}
-                                onClick={closeMenu}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Mobile CTA */}
-                    <div className="p-6 border-t border-zinc-800/50">
+                    {NAV_ITEMS.map((item) => (
+                        <MobileNavLink
+                            key={item.href}
+                            item={item}
+                            isActive={isActive(item.href)}
+                            onClick={toggleMenu}
+                        />
+                    ))}
+                    <div className="p-4 border-t border-zinc-800">
                         <Button
                             asChild
-                            className="relative w-full h-14 px-6 text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0 shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 hover:scale-102 transition-all duration-300 rounded-xl overflow-hidden group"
+                            className={cn(
+                                "w-full h-12 text-sm font-bold",
+                                "bg-gradient-to-r from-red-600 to-red-700 text-white",
+                                "shadow-lg shadow-red-500/20 rounded-xl",
+                                "transition-all duration-300",
+                                "hover:from-red-700 hover:to-red-800",
+                                "hover:shadow-xl hover:shadow-red-500/30"
+                            )}
                         >
-                            <Link
-                                href="/contact"
-                                onClick={closeMenu}
-                                className="flex items-center justify-center relative z-10"
-                            >
-                                GET YOUR FREE SNIFF CHECK
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                            </Link>
+                            <Link href="/contact">GET FREE AUDIT</Link>
                         </Button>
                     </div>
                 </nav>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            {isOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-20"
+                    onClick={toggleMenu}
+                    aria-hidden="true"
+                />
+            )}
         </>
     );
-});
-
-Header.displayName = "Header";
-export default Header;
+}

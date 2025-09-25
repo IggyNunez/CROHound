@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
-import { HoverTest } from "@/components/HoverTest";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,9 +80,6 @@ export default function RootLayout({
                 <Header />
                 <main className="min-h-screen">{children}</main>
                 <Footer />
-
-                {/* Hover Test - Remove after testing */}
-                <HoverTest />
 
                 {/* Analytics - lazy loaded for performance */}
                 <Analytics
