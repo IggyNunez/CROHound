@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Script from "next/script";
@@ -8,15 +7,6 @@ import { useEffect } from "react";
 interface AnalyticsProps {
     gaId?: string;
     clarityId?: string;
-}
-
-// Global window extensions
-declare global {
-    interface Window {
-        gtag?: (...args: any[]) => void;
-        clarity?: (...args: any[]) => void;
-        dataLayer?: any[];
-    }
 }
 
 export function Analytics({ gaId, clarityId }: AnalyticsProps) {
