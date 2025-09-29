@@ -10,7 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, TrendingUp, Users, Zap } from "lucide-react";
 import { Hero, HeroVariants } from "@/components/sections/Hero";
-import { OrganizationSchema, WebsiteSchema } from "@/components/StructuredData";
+import {
+    OrganizationSchema,
+    WebsiteSchema,
+    CROServiceSchema,
+    CROFAQSchema,
+} from "@/components/StructuredData";
 
 export default function HomePage() {
     return (
@@ -18,6 +23,8 @@ export default function HomePage() {
             {/* Structured Data */}
             <OrganizationSchema />
             <WebsiteSchema />
+            <CROServiceSchema />
+            <CROFAQSchema />
 
             <div className="flex flex-col">
                 {/* Hero Section - Using Reusable Component */}

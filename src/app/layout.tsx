@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
 import { WebVitals } from "@/components/WebVitals";
+import clientEnv from "@/lib/env";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,9 +29,7 @@ export const metadata: Metadata = {
     authors: [{ name: "CROHound" }],
     creator: "CROHound",
     publisher: "CROHound",
-    metadataBase: new URL(
-        process.env.NEXT_PUBLIC_SITE_URL || "https://www.crohound.com"
-    ),
+    metadataBase: new URL(clientEnv.SITE_URL),
     openGraph: {
         type: "website",
         locale: "en_US",
@@ -84,13 +83,10 @@ export default function RootLayout({
                 <Footer />
 
                 {/* Analytics - lazy loaded for performance */}
-                <Analytics
-                    gaId={process.env.NEXT_PUBLIC_GA_ID}
-                    clarityId={process.env.NEXT_PUBLIC_CLARITY_ID}
-                />
+                <Analytics />
 
                 {/* Web Vitals Performance Monitoring */}
-                <WebVitals gaId={process.env.NEXT_PUBLIC_GA_ID} />
+                <WebVitals gaId={clientEnv.GA_ID} />
             </body>
         </html>
     );

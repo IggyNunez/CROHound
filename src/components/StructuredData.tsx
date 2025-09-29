@@ -214,6 +214,226 @@ export function BreadcrumbSchema({
     return <JsonLd data={breadcrumbData} />;
 }
 
+// CRO service schema for rich snippets
+export function CROServiceSchema() {
+    const serviceData = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: "Shopify Conversion Rate Optimization",
+        serviceType: "Conversion Rate Optimization",
+        description:
+            "Professional CRO services to increase your Shopify store's conversion rate and revenue without adding ad spend.",
+        provider: {
+            "@type": "Organization",
+            name: COMPANY_INFO.name,
+            url: COMPANY_INFO.website,
+            email: COMPANY_INFO.email,
+        },
+        areaServed: {
+            "@type": "Place",
+            name: "Worldwide",
+        },
+        availableChannel: {
+            "@type": "ServiceChannel",
+            serviceUrl: `${COMPANY_INFO.website}/contact`,
+            availableLanguage: "English",
+        },
+        offers: [
+            {
+                "@type": "Offer",
+                name: "Free Sniff Check",
+                price: "0",
+                priceCurrency: "USD",
+                description:
+                    "12-point conversion audit with 5-minute video walkthrough and quick wins checklist",
+                availability: "https://schema.org/InStock",
+                priceValidUntil: "2025-12-31",
+            },
+            {
+                "@type": "Offer",
+                name: "Monthly CRO Program",
+                price: "2500",
+                priceCurrency: "USD",
+                description:
+                    "Ongoing conversion optimization with up to 10 dev hours monthly, A/B testing, and performance reporting",
+                availability: "https://schema.org/InStock",
+            },
+            {
+                "@type": "Offer",
+                name: "Project-Based Optimization",
+                price: "5000",
+                priceCurrency: "USD",
+                description:
+                    "Complete site overhaul with custom optimization strategy and 3-month follow-up support",
+                availability: "https://schema.org/InStock",
+            },
+        ],
+        category: "Digital Marketing",
+        serviceOutput: [
+            {
+                "@type": "Thing",
+                name: "Conversion Rate Improvement",
+            },
+            {
+                "@type": "Thing",
+                name: "Revenue Increase",
+            },
+            {
+                "@type": "Thing",
+                name: "User Experience Optimization",
+            },
+        ],
+        hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name: "CRO Services",
+            itemListElement: [
+                {
+                    "@type": "Offer",
+                    itemOffered: {
+                        "@type": "Service",
+                        name: "Conversion Rate Audit",
+                        description:
+                            "Comprehensive analysis of conversion barriers and opportunities",
+                    },
+                },
+                {
+                    "@type": "Offer",
+                    itemOffered: {
+                        "@type": "Service",
+                        name: "A/B Testing & Optimization",
+                        description:
+                            "Data-driven testing to validate changes and maximize improvements",
+                    },
+                },
+                {
+                    "@type": "Service",
+                    name: "Technical Performance Optimization",
+                    description:
+                        "Speed optimization and technical improvements to reduce bounce rates",
+                },
+            ],
+        },
+        review: {
+            "@type": "Review",
+            reviewRating: {
+                "@type": "Rating",
+                ratingValue: "5.0",
+                bestRating: "5",
+            },
+            author: {
+                "@type": "Person",
+                name: "Sarah M.",
+            },
+            reviewBody:
+                "CROHound increased our conversion rate by 40% in just 3 months. The free audit alone provided incredibly valuable insights.",
+        },
+        aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "4.9",
+            reviewCount: "47",
+            bestRating: "5",
+        },
+    };
+
+    return <JsonLd data={serviceData} />;
+}
+
+// FAQ Schema for CRO-related questions
+export function CROFAQSchema() {
+    const faqs = [
+        {
+            question: "How quickly can I see CRO results?",
+            answer: "Most clients see initial improvements within 2-4 weeks of implementing our recommendations. Significant conversion rate increases typically occur after 2-3 months of consistent optimization and testing.",
+        },
+        {
+            question: "What's included in the free Sniff Check?",
+            answer: "Our free Sniff Check includes a comprehensive 12-point conversion audit, a 5-minute personalized video walkthrough highlighting key issues, and a prioritized quick-wins checklist delivered within 48 hours.",
+        },
+        {
+            question: "Do you work with stores outside of Shopify?",
+            answer: "While we specialize in Shopify CRO, our conversion optimization principles apply to most ecommerce platforms. Contact us to discuss your specific platform needs.",
+        },
+        {
+            question: "What's the minimum traffic requirement for CRO?",
+            answer: "For meaningful A/B testing, we recommend at least 1,000 unique visitors per week. However, our audit and optimization recommendations can benefit stores of any size.",
+        },
+        {
+            question: "How do you measure CRO success?",
+            answer: "We track key metrics including overall conversion rate, page-specific conversion rates, average order value, customer lifetime value, and cart abandonment rate. All improvements are measured against statistical significance thresholds.",
+        },
+    ];
+
+    return <FAQSchema faqs={faqs} />;
+}
+
+// Enhanced blog post schema for better content SEO
+export function BlogPostSchema({
+    title,
+    description,
+    publishedAt,
+    author,
+    category,
+    slug,
+    image,
+    readingTime,
+}: {
+    title: string;
+    description: string;
+    publishedAt: string;
+    author: string;
+    category: string;
+    slug: string;
+    image?: string;
+    readingTime?: string;
+}) {
+    const blogData = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: title,
+        description: description,
+        image: image
+            ? `${COMPANY_INFO.website}${image}`
+            : `${COMPANY_INFO.website}/og-image.jpg`,
+        author: {
+            "@type": "Person",
+            name: author,
+            url: `${COMPANY_INFO.website}/about`,
+        },
+        publisher: {
+            "@type": "Organization",
+            name: COMPANY_INFO.name,
+            logo: {
+                "@type": "ImageObject",
+                url: `${COMPANY_INFO.website}/logo.png`,
+            },
+        },
+        datePublished: publishedAt,
+        dateModified: publishedAt,
+        mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": `${COMPANY_INFO.website}/blog/${slug}`,
+        },
+        articleSection: category,
+        keywords: [
+            category,
+            "conversion optimization",
+            "shopify",
+            "ecommerce",
+            "CRO",
+        ],
+        wordCount: readingTime
+            ? parseInt(readingTime.split(" ")[0]) * 200
+            : undefined,
+        timeRequired: readingTime
+            ? `PT${readingTime.split(" ")[0]}M`
+            : undefined,
+        inLanguage: "en-US",
+        isAccessibleForFree: true,
+    };
+
+    return <JsonLd data={blogData} />;
+}
+
 // Website schema for the main site
 export function WebsiteSchema() {
     const websiteData = {

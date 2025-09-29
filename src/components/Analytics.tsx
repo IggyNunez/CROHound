@@ -3,13 +3,17 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import clientEnv from "@/lib/env";
 
 interface AnalyticsProps {
     gaId?: string;
     clarityId?: string;
 }
 
-export function Analytics({ gaId, clarityId }: AnalyticsProps) {
+export function Analytics({
+    gaId = clientEnv.GA_ID,
+    clarityId = clientEnv.CLARITY_ID,
+}: AnalyticsProps) {
     const pathname = usePathname();
 
     useEffect(() => {
