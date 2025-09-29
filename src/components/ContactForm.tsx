@@ -1,79 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
-import { contactSchema, type ContactFormData } from "@/lib/validation";
+import { useContactForm } from "@/hooks/useContactForm";
 
 export default function ContactForm() {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const form = useForm<ContactFormData>({
-        resolver: zodResolver(contactSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            storeUrl: "",
-            monthlyRevenue: undefined,
-            message: "",
-            honeypot: "", // Hidden field for spam protection
-        },
-    });
-
-    async function onSubmit(data: ContactFormData) {
-        setIsSubmitting(true);
-        setError(null);
-
-        try {
-            const response = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                if (response.status === 429) {
-                    throw new Error(
-                        "You've submitted too many requests. Please try again in 15 minutes."
-                    );
-                }
-                throw new Error(result.error || "Failed to send message");
-            }
-
-            setIsSuccess(true);
-            form.reset();
-
-            // Track conversion
-            if (typeof window !== "undefined" && window.gtag) {
-                window.gtag("event", "generate_lead", {
-                    currency: "USD",
-                    value: 0,
-                });
-            }
-
-            // Track with Clarity (if available)
-            if (typeof window !== "undefined" && window.clarity) {
-                window.clarity("event", "contact_form_submit");
-            }
-        } catch (err) {
-            const errorMessage =
-                err instanceof Error
-                    ? err.message
-                    : "Something went wrong. Please try again or email us directly at hello@crohound.com";
-            setError(errorMessage);
-            console.error("Contact form error:", err);
-        } finally {
-            setIsSubmitting(false);
-        }
-    }
+    const { form, isSubmitting, isSuccess, error, onSubmit } = useContactForm();
 
     if (isSuccess) {
         return (
@@ -105,7 +39,7 @@ export default function ContactForm() {
     }
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-6">
             {/* Honeypot field (hidden) */}
             <input
                 type="text"

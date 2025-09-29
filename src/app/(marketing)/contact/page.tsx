@@ -7,9 +7,15 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import ContactForm from "@/components/ContactForm";
+import { ContactFormSkeleton } from "@/components/ui/ContactFormSkeleton";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import type { Metadata } from "next";
+
+// Dynamically import ContactForm to reduce initial bundle size
+const ContactForm = dynamic(() => import("@/components/ContactForm"), {
+    loading: () => <ContactFormSkeleton />,
+});
 
 export const metadata: Metadata = {
     title: "Contact - Get Your Free Shopify CRO Sniff Check",

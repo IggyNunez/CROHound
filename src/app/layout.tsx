@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
+import { WebVitals } from "@/components/WebVitals";
 import "./globals.css";
 
 const inter = Inter({
@@ -87,6 +88,9 @@ export default function RootLayout({
                     gaId={process.env.NEXT_PUBLIC_GA_ID}
                     clarityId={process.env.NEXT_PUBLIC_CLARITY_ID}
                 />
+
+                {/* Web Vitals Performance Monitoring */}
+                <WebVitals gaId={process.env.NEXT_PUBLIC_GA_ID} />
             </body>
         </html>
     );
