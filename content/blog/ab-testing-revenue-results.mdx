@@ -108,7 +108,8 @@ Multiple clients tested checkout button variations focusing on psychology rather
     {% assign button_text = 'Add to Cart' %}
 {% endcase %}
 
-<button class="btn-primary">{{ button_text }}</button>
+<!-- Button element would be: -->
+<!-- <button class="btn-primary">{{ button_text }}</button> -->
 ```
 
 ## Test #3: Mobile Checkout Field Optimization
@@ -252,21 +253,15 @@ Social proof works, but placement and timing determine effectiveness.
 
 ```liquid
 <!-- Move reviews above the fold -->
-<div class="product-reviews-summary">
-  {% if product.metafields.reviews.rating %}
-    <div class="star-rating">
-      {% for i in (1..5) %}
-        {% if i <= product.metafields.reviews.rating %}★{% else %}☆{% endif %}
-      {% endfor %}
-      <span>({{ product.metafields.reviews.count }} reviews)</span>
-    </div>
+<!-- Product reviews summary would be structured as: -->
+{% if product.metafields.reviews.rating %}
+  <!-- Star rating display with {{ product.metafields.reviews.rating }} stars -->
+  <!-- Review count: ({{ product.metafields.reviews.count }} reviews) -->
 
-    <div class="recent-review">
-      "{{ product.metafields.reviews.latest_review }}"
-      - {{ product.metafields.reviews.latest_reviewer }}
-    </div>
-  {% endif %}
-</div>
+  <!-- Recent review preview: -->
+  <!-- "{{ product.metafields.reviews.latest_review }}" -->
+  <!-- - {{ product.metafields.reviews.latest_reviewer }} -->
+{% endif %}
 ```
 
 ## Test #6: Exit-Intent Offer Strategy
@@ -356,21 +351,18 @@ Optimize how customers interact with product images to reduce uncertainty.
 
 ```liquid
 <!-- Video-first product gallery -->
-<div class="product-media">
-  {% if product.metafields.videos.main_video %}
-    <video autoplay muted loop playsinline>
-      <source src="{{ product.metafields.videos.main_video }}" type="video/mp4">
-    </video>
-  {% endif %}
+<!-- Video-first product gallery structure -->
+{% if product.metafields.videos.main_video %}
+  <!-- Video element would have: autoplay muted loop playsinline -->
+  <!-- Source: {{ product.metafields.videos.main_video }} -->
+{% endif %}
 
-  <div class="thumbnail-gallery">
-    {% for image in product.images %}
-      <img src="{{ image | image_url: width: 100 }}"
-           alt="{{ image.alt }}"
-           data-full="{{ image | image_url: width: 800 }}">
-    {% endfor %}
-  </div>
-</div>
+<!-- Thumbnail gallery -->
+{% for image in product.images %}
+  <!-- Image thumbnail: {{ image | image_url: width: 100 }} -->
+  <!-- Full size available: {{ image | image_url: width: 800 }} -->
+  <!-- Alt text: {{ image.alt }} -->
+{% endfor %}
 ```
 
 ## Implementing These Tests in Your Store

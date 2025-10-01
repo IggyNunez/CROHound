@@ -13,7 +13,9 @@ const clientEnvSchema = z.object({
 
 const serverEnvSchema = z.object({
     // Server-only variables (never exposed to client)
-    RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required for production"),
+    RESEND_API_KEY: z
+        .string()
+        .min(1, "RESEND_API_KEY is required for production"),
 });
 
 // Parse client environment variables (always safe)
@@ -28,7 +30,10 @@ const clientEnvParsed = clientEnvSchema.parse({
 let serverEnvParsed: z.infer<typeof serverEnvSchema> | null = null;
 
 try {
-    if (process.env.RESEND_API_KEY || clientEnvParsed.NODE_ENV === "production") {
+    if (
+        process.env.RESEND_API_KEY ||
+        clientEnvParsed.NODE_ENV === "production"
+    ) {
         serverEnvParsed = serverEnvSchema.parse({
             RESEND_API_KEY: process.env.RESEND_API_KEY,
         });
@@ -38,7 +43,9 @@ try {
         console.error("Missing required server environment variables:", error);
         throw error;
     } else {
-        console.warn("Server environment variables not set (OK for development)");
+        console.warn(
+            "Server environment variables not set (OK for development)"
+        );
     }
 }
 
@@ -61,11 +68,14 @@ export function getServerEnv() {
     if (typeof window !== "undefined") {
         throw new Error("serverEnv can only be used on the server side");
     }
-    
-    if (!serverEnvParsed?.RESEND_API_KEY && clientEnvParsed.NODE_ENV === "production") {
+
+    if (
+        !serverEnvParsed?.RESEND_API_KEY &&
+        clientEnvParsed.NODE_ENV === "production"
+    ) {
         throw new Error("RESEND_API_KEY is required in production");
     }
-    
+
     return serverEnv;
 }
 
