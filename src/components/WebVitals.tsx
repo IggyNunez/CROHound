@@ -2,13 +2,22 @@
 
 import { useEffect } from "react";
 import { useReportWebVitals } from "next/web-vitals";
+import type { Metric } from "web-vitals";
 
 interface WebVitalsProps {
     gaId?: string;
 }
 
 export function WebVitals({ gaId }: WebVitalsProps) {
-    useReportWebVitals((metric) => {
+    useEffect(() => {
+        const abortController = new AbortController();
+
+        return () => {
+            abortController.abort();
+        };
+    }, []);
+
+    useReportWebVitals((metric: Metric) => {
         // Log vitals to console in development
         if (process.env.NODE_ENV === "development") {
             console.log(`[Web Vitals] ${metric.name}:`, metric);
@@ -31,16 +40,22 @@ export function WebVitals({ gaId }: WebVitalsProps) {
             });
         }
 
-        // Send to custom analytics endpoint (optional)
+        // Send to custom analytics endpoint (optional) - using a separate effect for abort control
         if (process.env.NODE_ENV === "production") {
+            const controller = new AbortController();
+
             fetch("/api/vitals", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(metric),
+                signal: controller.signal,
             }).catch((error) => {
-                console.error("Failed to send web vitals:", error);
+                // Don't log aborted requests
+                if (error.name !== "AbortError") {
+                    console.error("Failed to send web vitals:", error);
+                }
             });
         }
     });
@@ -51,53 +66,60 @@ export function WebVitals({ gaId }: WebVitalsProps) {
 // Performance monitoring hooks
 export function usePerformanceMonitoring() {
     useEffect(() => {
-        // Track page load performance
-        if (typeof window !== "undefined" && "performance" in window) {
-            const navigation = performance.getEntriesByType(
-                "navigation"
-            )[0] as PerformanceNavigationTiming;
+        // Track page load performance with slight delay to ensure metrics are available
+        const timeoutId = setTimeout(() => {
+            if (typeof window !== "undefined" && "performance" in window) {
+                const navigation = performance.getEntriesByType(
+                    "navigation"
+                )[0] as PerformanceNavigationTiming;
 
-            if (navigation) {
-                const metrics = {
-                    // Core loading metrics
-                    domContentLoaded:
-                        navigation.domContentLoadedEventEnd -
-                        navigation.domContentLoadedEventStart,
-                    loadComplete:
-                        navigation.loadEventEnd - navigation.loadEventStart,
+                if (navigation) {
+                    const metrics = {
+                        // Core loading metrics
+                        domContentLoaded:
+                            navigation.domContentLoadedEventEnd -
+                            navigation.domContentLoadedEventStart,
+                        loadComplete:
+                            navigation.loadEventEnd - navigation.loadEventStart,
 
-                    // Network timing
-                    dnsLookup:
-                        navigation.domainLookupEnd -
-                        navigation.domainLookupStart,
-                    tcpConnection:
-                        navigation.connectEnd - navigation.connectStart,
-                    serverResponse:
-                        navigation.responseEnd - navigation.requestStart,
+                        // Network timing
+                        dnsLookup:
+                            navigation.domainLookupEnd -
+                            navigation.domainLookupStart,
+                        tcpConnection:
+                            navigation.connectEnd - navigation.connectStart,
+                        serverResponse:
+                            navigation.responseEnd - navigation.requestStart,
 
-                    // Resource timing
-                    domProcessing:
-                        navigation.domComplete - navigation.domInteractive,
+                        // Resource timing
+                        domProcessing:
+                            navigation.domComplete - navigation.domInteractive,
 
-                    // Overall timing
-                    totalPageLoad:
-                        navigation.loadEventEnd - navigation.fetchStart,
-                };
+                        // Overall timing
+                        totalPageLoad:
+                            navigation.loadEventEnd - navigation.fetchStart,
+                    };
 
-                console.log("[Performance Metrics]", metrics);
+                    console.log("[Performance Metrics]", metrics);
 
-                // Track slow pages (>3s load time)
-                if (metrics.totalPageLoad > 3000) {
-                    if (typeof window.gtag === "function") {
-                        window.gtag("event", "slow_page_load", {
-                            event_category: "Performance",
-                            value: Math.round(metrics.totalPageLoad),
-                            page_path: window.location.pathname,
-                        });
+                    // Track slow pages (>3s load time)
+                    if (metrics.totalPageLoad > 3000) {
+                        if (typeof window.gtag === "function") {
+                            window.gtag("event", "slow_page_load", {
+                                event_category: "Performance",
+                                value: Math.round(metrics.totalPageLoad),
+                                page_path: window.location.pathname,
+                            });
+                        }
                     }
                 }
             }
-        }
+        }, 100);
+
+        // Cleanup timeout on unmount
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, []);
 }
 

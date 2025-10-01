@@ -5,8 +5,37 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useContactForm } from "@/hooks/useContactForm";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-export default function ContactForm() {
+// Contact form error fallback
+function ContactFormError() {
+    return (
+        <div className="border border-red-200 bg-red-50 p-6 rounded-lg">
+            <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                <div>
+                    <h3 className="font-semibold text-red-800">
+                        Contact Form Temporarily Unavailable
+                    </h3>
+                    <p className="text-red-700 mt-1">
+                        We&apos;re experiencing technical difficulties with our
+                        contact form. Please email us directly for immediate
+                        assistance.
+                    </p>
+                    <div className="mt-3">
+                        <Button asChild variant="outline" size="sm">
+                            <a href="mailto:hello@crohound.com">
+                                Email hello@crohound.com
+                            </a>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ContactFormContent() {
     const { form, isSubmitting, isSuccess, error, onSubmit } = useContactForm();
 
     if (isSuccess) {
@@ -207,5 +236,29 @@ export default function ContactForm() {
                 hours.
             </p>
         </form>
+    );
+}
+
+// Main component with error boundary
+export default function ContactForm() {
+    return (
+        <ErrorBoundary
+            fallback={<ContactFormError />}
+            onError={(error, errorInfo) => {
+                // Log contact form errors specifically
+                console.error("Contact form error:", error, errorInfo);
+
+                // Track form errors in analytics
+                if (typeof window !== "undefined" && window.gtag) {
+                    window.gtag("event", "contact_form_error", {
+                        event_category: "Error",
+                        error_message: error.message,
+                        form_state: "submission_error",
+                    });
+                }
+            }}
+        >
+            <ContactFormContent />
+        </ErrorBoundary>
     );
 }

@@ -4,6 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Analytics } from "@/components/Analytics";
 import { WebVitals } from "@/components/WebVitals";
+import { ErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundary";
+import { ResourceHints } from "@/components/ResourceHints";
 import clientEnv from "@/lib/env";
 import "./globals.css";
 
@@ -74,19 +76,76 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                {/* Resource Hints for Performance */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link
+                    rel="preconnect"
+                    href="https://fonts.gstatic.com"
+                    crossOrigin=""
+                />
+                <link
+                    rel="dns-prefetch"
+                    href="https://www.googletagmanager.com"
+                />
+                <link
+                    rel="dns-prefetch"
+                    href="https://www.google-analytics.com"
+                />
+                <link rel="dns-prefetch" href="https://clarity.microsoft.com" />
+
+                {/* Preload critical assets */}
+                <link
+                    rel="preload"
+                    href="/logo_no_description.png"
+                    as="image"
+                    type="image/png"
+                />
+
+                {/* Prefetch important pages */}
+                <link rel="prefetch" href="/contact" />
+                <link rel="prefetch" href="/packages" />
+                <link rel="prefetch" href="/services" />
+
+                {/* Preload Inter font variable (critical for LCP) */}
+                <link
+                    rel="preload"
+                    href="/_next/static/media/HASH_PLACEHOLDER.woff2"
+                    as="font"
+                    type="font/woff2"
+                    crossOrigin=""
+                />
+            </head>
             <body
                 className={`${inter.variable} font-sans antialiased`}
                 suppressHydrationWarning={true}
             >
-                <Header />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
+                <ErrorBoundary>
+                    <Header />
+                    <main className="min-h-screen">
+                        <AsyncErrorBoundary>{children}</AsyncErrorBoundary>
+                    </main>
+                    <Footer />
+                </ErrorBoundary>
 
                 {/* Analytics - lazy loaded for performance */}
-                <Analytics />
+                <ErrorBoundary
+                    fallback={
+                        <div className="hidden">
+                            {/* Analytics failed to load */}
+                        </div>
+                    }
+                >
+                    <Analytics />
+                </ErrorBoundary>
 
                 {/* Web Vitals Performance Monitoring */}
-                <WebVitals gaId={clientEnv.GA_ID} />
+                <ErrorBoundary fallback={null}>
+                    <WebVitals gaId={clientEnv.GA_ID} />
+                </ErrorBoundary>
+
+                {/* Dynamic Resource Hints */}
+                <ResourceHints />
             </body>
         </html>
     );
